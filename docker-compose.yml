@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: escapeup
+      POSTGRES_PASSWORD: escapeup
+      POSTGRES_DB: escapeup
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U escapeup -d escapeup"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://escapeup:escapeup@postgres:5432/escapeup
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile
+    # 8080 hôte est déjà pris par un autre projet → on expose sur 8090.
+    ports:
+      - "8090:80"
+    depends_on:
+      - server
+
+volumes:
+  pgdata:

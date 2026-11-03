@@ -1,0 +1,556 @@
+{
+  "version": 1,
+  "seed": "LAB-7C42",
+  "config": { "difficulty": "medium", "theme": "laboratoire" },
+  "theme": "laboratoire",
+  "narrative": {
+    "title": "Protocole P-7",
+    "backstory": "Le 12 mars 1987, une fuite du composé VX-Hélios s'est produite dans la cuve principale du laboratoire Helios. Le Dr Elias Verne a déclenché le confinement d'urgence avant de disparaître. Le technicien Marc Roux, négligent, a laissé son badge et un casier au code prévisible. Le confinement ne se lève que si la cuve est neutralisée selon le protocole P-7.",
+    "playerObjective": "Le confinement du laboratoire Helios ne peut être levé que de l'intérieur. Trouvez comment neutraliser la cuve, et sortez.",
+    "epilogue": "La cuve est neutralisée. Le protocole P-7 du Dr Verne aura fonctionné — neuf ans trop tard. Quant à savoir pourquoi sa combinaison est restée pendue dans la réserve… c'est une autre enquête."
+  },
+
+  "zones": [
+    {
+      "id": "z1",
+      "name": "Bureau d'accueil",
+      "layer": 0,
+      "pois": [
+        { "id": "poi.comptoir", "name": "Comptoir d'accueil" },
+        { "id": "poi.tableau_affichage", "name": "Tableau d'affichage" },
+        { "id": "poi.casiers", "name": "Casiers du personnel" },
+        { "id": "poi.tableau_electrique", "name": "Tableau électrique" },
+        { "id": "poi.porte_exp", "name": "Porte « SALLE D'EXPÉRIMENTATION — EXP »" },
+        { "id": "poi.porte_reserve", "name": "Porte « RÉSERVE CHIMIQUE »" },
+        { "id": "poi.sas_sortie", "name": "Sas de sortie" }
+      ]
+    },
+    {
+      "id": "z2",
+      "name": "Salle d'expérimentation",
+      "layer": 1,
+      "gate": "p2",
+      "pois": [
+        { "id": "poi.bureau_verne", "name": "Bureau du Dr Verne" },
+        { "id": "poi.paillasse", "name": "Paillasse centrale" },
+        { "id": "poi.tableau_blanc", "name": "Tableau blanc" }
+      ]
+    },
+    {
+      "id": "z3",
+      "name": "Réserve chimique",
+      "layer": 2,
+      "gate": "p3",
+      "pois": [
+        { "id": "poi.cuves", "name": "Cuves de neutralisation" },
+        { "id": "poi.etageres", "name": "Étagères de flacons" }
+      ]
+    }
+  ],
+
+  "objects": [
+    {
+      "id": "obj.tableau_affichage",
+      "name": "Tableau d'affichage",
+      "description": "Un tableau en liège couvert de notes de service jaunies.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z1", "poiId": "poi.tableau_affichage" },
+      "state": "visible",
+      "affordances": ["inspect", "read"],
+      "reveals": [
+        {
+          "on": "read",
+          "nodeIds": ["info.memo_casier"],
+          "text": "Note de service — Les casiers doivent rester verrouillés. M. Roux : utiliser son numéro d'employé comme code de casier n'est PAS un code. Changez-le. — La direction"
+        }
+      ],
+      "requires": [],
+      "narrativeFragment": "La direction se méfiait de la négligence de Roux."
+    },
+    {
+      "id": "obj.comptoir",
+      "name": "Comptoir d'accueil",
+      "description": "Un comptoir poussiéreux ; le registre des visites est resté ouvert.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z1", "poiId": "poi.comptoir" },
+      "state": "visible",
+      "affordances": ["inspect"],
+      "reveals": [
+        {
+          "on": "inspect",
+          "nodeIds": [],
+          "objectIds": ["obj.badge_roux"],
+          "text": "En passant la main derrière le comptoir, vous délogez un badge tombé là depuis longtemps."
+        }
+      ],
+      "requires": []
+    },
+    {
+      "id": "obj.badge_roux",
+      "name": "Badge de M. Roux",
+      "description": "Un badge d'employé au fermoir cassé.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z1", "poiId": "poi.comptoir" },
+      "state": "hidden",
+      "affordances": ["take", "read"],
+      "reveals": [
+        {
+          "on": "read",
+          "nodeIds": ["info.badge_roux"],
+          "text": "HELIOS LABS — ROUX Marc — Employé n° 418 — Casier 3"
+        }
+      ],
+      "requires": [],
+      "narrativeFragment": "Roux est parti si vite qu'il a perdu son badge."
+    },
+    {
+      "id": "obj.casier3",
+      "name": "Casier n° 3",
+      "description": "Un casier métallique fermé par un cadenas à 3 chiffres. L'étiquette indique « code personnel : votre numéro d'employé est interdit »… barrée d'un trait rageur.",
+      "family": "mechanism",
+      "location": { "zoneId": "z1", "poiId": "poi.casiers" },
+      "state": "locked",
+      "affordances": ["inspect", "enter_code"],
+      "reveals": [
+        {
+          "on": "enter_code",
+          "nodeIds": [],
+          "objectIds": ["obj.cle_exp", "obj.lampe_uv"],
+          "text": "Le cadenas cède. À l'intérieur : une clé étiquetée « EXP » et une lampe UV de maintenance."
+        }
+      ],
+      "requires": [{ "puzzleId": "p1" }]
+    },
+    {
+      "id": "obj.cle_exp",
+      "name": "Clé « EXP »",
+      "description": "Une clé plate dont l'étiquette porte la mention EXP.",
+      "family": "instrument",
+      "location": "hidden",
+      "state": "hidden",
+      "affordances": ["take", "use_on"],
+      "reveals": [],
+      "requires": [{ "access": "access.casier3" }]
+    },
+    {
+      "id": "obj.lampe_uv",
+      "name": "Lampe UV",
+      "description": "Une lampe torche à ultraviolets, utilisée par la maintenance pour inspecter les fuites.",
+      "family": "instrument",
+      "location": "hidden",
+      "state": "hidden",
+      "affordances": ["take", "use_on"],
+      "reveals": [],
+      "requires": [{ "access": "access.casier3" }]
+    },
+    {
+      "id": "obj.porte_exp",
+      "name": "Porte « SALLE D'EXPÉRIMENTATION — EXP »",
+      "description": "Une porte à serrure mécanique. La plaque indique : SALLE D'EXPÉRIMENTATION — EXP.",
+      "family": "mechanism",
+      "location": { "zoneId": "z1", "poiId": "poi.porte_exp" },
+      "state": "locked",
+      "affordances": ["inspect", "use_on"],
+      "reveals": [],
+      "requires": [{ "puzzleId": "p2" }]
+    },
+    {
+      "id": "obj.porte_reserve",
+      "name": "Porte « RÉSERVE CHIMIQUE »",
+      "description": "Une porte lourde fermée par un cadenas à 4 molettes. Au-dessus des molettes, une plaque gravée : « ANNÉE ».",
+      "family": "mechanism",
+      "location": { "zoneId": "z1", "poiId": "poi.porte_reserve" },
+      "state": "locked",
+      "affordances": ["inspect", "enter_code"],
+      "reveals": [],
+      "requires": [{ "puzzleId": "p3" }]
+    },
+    {
+      "id": "obj.tableau_electrique",
+      "name": "Tableau électrique",
+      "description": "Quatre porte-fusibles étiquetés F1 à F4 et leurs disjoncteurs. Le fusible F3 est noirci, grillé. Un voyant rouge clignote : défaut de séquence.",
+      "family": "mechanism",
+      "location": { "zoneId": "z1", "poiId": "poi.tableau_electrique" },
+      "state": "visible",
+      "affordances": ["inspect", "use_on", "activate"],
+      "reveals": [],
+      "requires": [{ "puzzleId": "p5" }]
+    },
+    {
+      "id": "obj.panneau_purge",
+      "name": "Panneau de purge",
+      "description": "Un panneau de commande à trois boutons gravés de symboles : ▲, ●, ■. L'écran est éteint.",
+      "family": "mechanism",
+      "location": { "zoneId": "z1", "poiId": "poi.sas_sortie" },
+      "state": "visible",
+      "affordances": ["inspect", "enter_code"],
+      "reveals": [],
+      "requires": [{ "state": "state.courant" }, { "puzzleId": "p6" }]
+    },
+    {
+      "id": "obj.porte_blindee",
+      "name": "Porte blindée de sortie",
+      "description": "La porte du sas, scellée par le confinement. Un pictogramme : « déverrouillage par purge de décontamination uniquement ».",
+      "family": "mechanism",
+      "location": { "zoneId": "z1", "poiId": "poi.sas_sortie" },
+      "state": "locked",
+      "affordances": ["inspect"],
+      "reveals": [],
+      "requires": [{ "goal": "goal.sortie" }]
+    },
+    {
+      "id": "obj.plante_verte",
+      "name": "Plante verte desséchée",
+      "description": "Un ficus mort depuis des années. Personne n'est venu l'arroser.",
+      "family": "decor",
+      "location": { "zoneId": "z1", "poiId": "poi.comptoir" },
+      "state": "visible",
+      "affordances": ["inspect"],
+      "reveals": [],
+      "requires": []
+    },
+    {
+      "id": "obj.affiche_securite",
+      "name": "Affiche « La sécurité, c'est chaque jour »",
+      "description": "Une affiche de prévention défraîchie. Ironique, vu les circonstances.",
+      "family": "decor",
+      "location": { "zoneId": "z1", "poiId": "poi.tableau_affichage" },
+      "state": "visible",
+      "affordances": ["inspect"],
+      "reveals": [],
+      "requires": []
+    },
+    {
+      "id": "obj.rapport_incident",
+      "name": "Rapport d'incident",
+      "description": "Une planchette à pince abandonnée sur la paillasse.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z2", "poiId": "poi.paillasse" },
+      "state": "visible",
+      "affordances": ["read"],
+      "reveals": [
+        {
+          "on": "read",
+          "nodeIds": ["info.date_incident"],
+          "text": "RAPPORT D'INCIDENT — 12 mars 1987 — Fuite du composé VX-Hélios, cuve principale. Confinement activé. Évacuation générale ordonnée."
+        }
+      ],
+      "requires": [],
+      "narrativeFragment": "Le jour où tout a basculé."
+    },
+    {
+      "id": "obj.postit_verne",
+      "name": "Post-it sur la lampe de bureau",
+      "description": "Un post-it jauni, collé sur le pied de la lampe.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z2", "poiId": "poi.bureau_verne" },
+      "state": "visible",
+      "affordances": ["read"],
+      "reveals": [
+        {
+          "on": "read",
+          "nodeIds": ["info.note_verne"],
+          "text": "Ils veulent que je change le code de la réserve chaque mois. Absurde. J'ai mis l'année où tout a basculé — impossible à oublier. — E.V."
+        }
+      ],
+      "requires": [],
+      "narrativeFragment": "Verne, marqué à vie par l'incident."
+    },
+    {
+      "id": "obj.journal_verne",
+      "name": "Journal du Dr Verne",
+      "description": "Un carnet de laboratoire à la couverture tachée.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z2", "poiId": "poi.bureau_verne" },
+      "state": "visible",
+      "affordances": ["read"],
+      "reveals": [
+        {
+          "on": "read",
+          "nodeIds": ["info.protocole_ordre"],
+          "text": "Protocole d'urgence P-7 : neutraliser la cuve en injectant dans l'ordre : l'acide, puis la base, puis le catalyseur. Les cuves de la réserve portent les symboles."
+        }
+      ],
+      "requires": [],
+      "narrativeFragment": "Verne avait prévu la catastrophe — et sa parade."
+    },
+    {
+      "id": "obj.tiroir_bureau",
+      "name": "Tiroir du bureau",
+      "description": "Le tiroir coulisse en grinçant.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z2", "poiId": "poi.bureau_verne" },
+      "state": "visible",
+      "affordances": ["inspect"],
+      "reveals": [
+        {
+          "on": "inspect",
+          "nodeIds": [],
+          "objectIds": ["obj.fusible"],
+          "text": "Parmi les stylos secs, un fusible de rechange encore sous blister."
+        }
+      ],
+      "requires": []
+    },
+    {
+      "id": "obj.fusible",
+      "name": "Fusible de rechange",
+      "description": "Un fusible neuf, du même calibre que ceux du tableau électrique.",
+      "family": "instrument",
+      "location": "hidden",
+      "state": "hidden",
+      "affordances": ["take", "use_on"],
+      "reveals": [],
+      "requires": []
+    },
+    {
+      "id": "obj.tableau_blanc",
+      "name": "Tableau blanc",
+      "description": "Un tableau blanc effacé à la hâte ; il reste des traînées de feutre.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z2", "poiId": "poi.tableau_blanc" },
+      "state": "visible",
+      "affordances": ["inspect", "use_on"],
+      "reveals": [
+        {
+          "on": "use_on",
+          "nodeIds": ["info.ordre_fusibles"],
+          "text": "Sous la lampe UV, les traces du marqueur effacé redeviennent lisibles : « Réarmement : F2 → F4 → F1 → F3 »."
+        }
+      ],
+      "requires": [{ "item": "item.lampe_uv", "for": "use_on" }],
+      "narrativeFragment": "Effacé pendant l'évacuation — mais pas assez."
+    },
+    {
+      "id": "obj.microscope",
+      "name": "Microscope",
+      "description": "Un microscope binoculaire, lentilles voilées de poussière.",
+      "family": "decor",
+      "location": { "zoneId": "z2", "poiId": "poi.paillasse" },
+      "state": "visible",
+      "affordances": ["inspect"],
+      "reveals": [],
+      "requires": []
+    },
+    {
+      "id": "obj.cuves_reserve",
+      "name": "Cuves de neutralisation",
+      "description": "Trois cuves reliées au circuit de purge, chacune frappée d'un symbole.",
+      "family": "info_carrier",
+      "location": { "zoneId": "z3", "poiId": "poi.cuves" },
+      "state": "visible",
+      "affordances": ["inspect", "read"],
+      "reveals": [
+        {
+          "on": "read",
+          "nodeIds": ["info.mapping_symboles"],
+          "text": "▲ ACIDE (H₂SO₄) · ● BASE (NaOH) · ■ CATALYSEUR K-12"
+        }
+      ],
+      "requires": [],
+      "narrativeFragment": "Le dispositif du protocole P-7, prêt depuis toutes ces années."
+    },
+    {
+      "id": "obj.combinaison_hazmat",
+      "name": "Combinaison hazmat",
+      "description": "Une combinaison intégrale pendue à son crochet. Son propriétaire n'est jamais venu la chercher.",
+      "family": "decor",
+      "location": { "zoneId": "z3", "poiId": "poi.etageres" },
+      "state": "visible",
+      "affordances": ["inspect"],
+      "reveals": [],
+      "requires": [],
+      "narrativeFragment": "Verne est-il vraiment sorti du laboratoire ?"
+    }
+  ],
+
+  "puzzles": [
+    {
+      "id": "p1",
+      "template": "code_from_document",
+      "mechanismObjectId": "obj.casier3",
+      "inputs": ["info.memo_casier", "info.badge_roux"],
+      "outputs": ["access.casier3", "item.cle_exp", "item.lampe_uv"],
+      "solution": { "kind": "code", "value": "418" },
+      "derivation": {
+        "sourceClueIds": ["info.memo_casier", "info.badge_roux"],
+        "rule": "code du casier de Roux = son numéro d'employé (mémo) ; le badge donne employé n° 418 et casier 3",
+        "anchorLabel": "numéro d'employé",
+        "inferenceSteps": 2
+      },
+      "hints": [
+        "Quelqu'un, à l'accueil, ne suivait pas les consignes de sécurité.",
+        "Le tableau d'affichage reproche quelque chose de précis à M. Roux.",
+        "Le mémo dit que son code de casier est son numéro d'employé. Où trouver ce numéro ?",
+        "Le badge derrière le comptoir : employé n° 418, casier 3. Code : 418."
+      ]
+    },
+    {
+      "id": "p2",
+      "template": "key_lock",
+      "mechanismObjectId": "obj.porte_exp",
+      "inputs": ["item.cle_exp"],
+      "outputs": ["access.z2"],
+      "solution": { "kind": "key", "itemId": "obj.cle_exp" },
+      "derivation": {
+        "sourceClueIds": [],
+        "rule": "la clé étiquetée EXP ouvre la porte étiquetée EXP",
+        "anchorLabel": "EXP",
+        "inferenceSteps": 1
+      },
+      "hints": [
+        "Une porte de l'accueil attend une clé.",
+        "L'étiquette de la clé du casier vous dit où l'utiliser.",
+        "EXP comme… la plaque d'une des portes.",
+        "La clé « EXP » ouvre la porte de la salle d'expérimentation."
+      ]
+    },
+    {
+      "id": "p3",
+      "template": "labeled_dial_code",
+      "mechanismObjectId": "obj.porte_reserve",
+      "inputs": ["info.note_verne", "info.date_incident"],
+      "outputs": ["access.z3"],
+      "solution": { "kind": "code", "value": "1987" },
+      "derivation": {
+        "sourceClueIds": ["info.note_verne", "info.date_incident"],
+        "rule": "post-it : code réserve = « l'année où tout a basculé » ; rapport d'incident : 12 mars 1987 ; cadran étiqueté ANNÉE → 1987",
+        "anchorLabel": "ANNÉE",
+        "inferenceSteps": 2
+      },
+      "hints": [
+        "Le cadenas de la réserve n'attend pas n'importe quel nombre : lisez sa plaque.",
+        "Quelqu'un a laissé un aveu sur le choix de ce code, dans la salle d'expérimentation.",
+        "« L'année où tout a basculé » : un document officiel la mentionne.",
+        "Le rapport d'incident date la catastrophe de 1987. Code : 1987."
+      ]
+    },
+    {
+      "id": "p4",
+      "template": "tool_reveal",
+      "mechanismObjectId": "obj.tableau_blanc",
+      "inputs": ["item.lampe_uv", "access.z2"],
+      "outputs": ["info.ordre_fusibles"],
+      "solution": { "kind": "use_on", "toolId": "obj.lampe_uv", "targetId": "obj.tableau_blanc" },
+      "derivation": {
+        "sourceClueIds": [],
+        "rule": "la lampe UV (maintenance) révèle les traces du marqueur effacé sur le tableau blanc",
+        "inferenceSteps": 1
+      },
+      "hints": [
+        "Un objet du casier de maintenance n'a pas encore servi.",
+        "Le tableau blanc a été effacé à la hâte : il en reste quelque chose.",
+        "Les traces de marqueur réapparaissent sous certaines lumières.",
+        "Éclairez le tableau blanc avec la lampe UV : l'ordre de réarmement apparaît."
+      ]
+    },
+    {
+      "id": "p5",
+      "template": "mechanism_sequence",
+      "mechanismObjectId": "obj.tableau_electrique",
+      "inputs": ["item.fusible", "info.ordre_fusibles"],
+      "outputs": ["state.courant"],
+      "solution": { "kind": "sequence", "steps": ["insert_fusible_F3", "arm_F2", "arm_F4", "arm_F1", "arm_F3"] },
+      "derivation": {
+        "sourceClueIds": ["info.ordre_fusibles"],
+        "rule": "remplacer le fusible grillé F3 (fusible du tiroir), puis réarmer selon l'écriture UV : F2 → F4 → F1 → F3",
+        "anchorLabel": "F1–F4",
+        "inferenceSteps": 2
+      },
+      "hints": [
+        "Le panneau de purge est éteint : le laboratoire n'a plus de courant.",
+        "Le tableau électrique a deux problèmes : un composant et un ordre.",
+        "Un fusible neuf dort dans un tiroir ; l'ordre de réarmement était écrit quelque part avant d'être effacé.",
+        "Fusible en F3, puis réarmez : F2, F4, F1, F3. Le courant revient."
+      ]
+    },
+    {
+      "id": "p6",
+      "template": "mapping_sequence",
+      "mechanismObjectId": "obj.panneau_purge",
+      "inputs": ["state.courant", "info.protocole_ordre", "info.mapping_symboles"],
+      "outputs": ["goal.sortie"],
+      "solution": { "kind": "sequence", "steps": ["press_triangle", "press_circle", "press_square"] },
+      "derivation": {
+        "sourceClueIds": ["info.protocole_ordre", "info.mapping_symboles"],
+        "rule": "journal : injecter acide puis base puis catalyseur ; cuves : ▲=acide, ●=base, ■=catalyseur → séquence ▲ ● ■",
+        "anchorLabel": "acide/base/catalyseur",
+        "inferenceSteps": 2
+      },
+      "hints": [
+        "Le panneau de purge attend une séquence de trois symboles.",
+        "Le Dr Verne a consigné un protocole d'injection quelque part.",
+        "Le journal donne un ordre en mots ; la réserve traduit ces mots en symboles.",
+        "Acide (▲), puis base (●), puis catalyseur (■) : appuyez ▲ ● ■."
+      ]
+    }
+  ],
+
+  "graph": {
+    "goalId": "goal.sortie",
+    "nodes": [
+      { "id": "access.z1", "type": "ACCESS", "layer": 0, "label": "Accueil accessible (départ)" },
+      { "id": "info.memo_casier", "type": "INFO", "layer": 0, "carrier": "obj.tableau_affichage", "label": "Le code du casier de Roux = son numéro d'employé" },
+      { "id": "info.badge_roux", "type": "INFO", "layer": 0, "carrier": "obj.badge_roux", "label": "Roux : employé n° 418, casier 3" },
+      { "id": "access.casier3", "type": "ACCESS", "layer": 0, "producedBy": "p1", "label": "Casier 3 ouvert" },
+      { "id": "item.cle_exp", "type": "ITEM", "layer": 0, "producedBy": "p1", "carrier": "obj.cle_exp", "label": "Clé EXP" },
+      { "id": "item.lampe_uv", "type": "ITEM", "layer": 0, "producedBy": "p1", "carrier": "obj.lampe_uv", "label": "Lampe UV" },
+      { "id": "access.z2", "type": "ACCESS", "layer": 1, "producedBy": "p2", "label": "Salle d'expérimentation accessible" },
+      { "id": "info.date_incident", "type": "INFO", "layer": 1, "carrier": "obj.rapport_incident", "label": "Incident du 12 mars 1987" },
+      { "id": "info.note_verne", "type": "INFO", "layer": 1, "carrier": "obj.postit_verne", "label": "Code réserve = l'année où tout a basculé" },
+      { "id": "info.protocole_ordre", "type": "INFO", "layer": 1, "carrier": "obj.journal_verne", "label": "Ordre d'injection : acide, base, catalyseur" },
+      { "id": "item.fusible", "type": "ITEM", "layer": 1, "carrier": "obj.fusible", "label": "Fusible de rechange" },
+      { "id": "info.ordre_fusibles", "type": "INFO", "layer": 1, "producedBy": "p4", "carrier": "obj.tableau_blanc", "label": "Réarmement : F2 → F4 → F1 → F3" },
+      { "id": "access.z3", "type": "ACCESS", "layer": 2, "producedBy": "p3", "label": "Réserve chimique accessible" },
+      { "id": "info.mapping_symboles", "type": "INFO", "layer": 2, "carrier": "obj.cuves_reserve", "label": "▲=acide, ●=base, ■=catalyseur" },
+      { "id": "state.courant", "type": "STATE", "layer": 1, "producedBy": "p5", "label": "Courant rétabli" },
+      { "id": "goal.sortie", "type": "GOAL", "layer": 2, "producedBy": "p6", "label": "Purge effectuée, confinement levé, sortie ouverte" }
+    ],
+    "edges": [
+      { "from": "info.memo_casier", "to": "p1" },
+      { "from": "info.badge_roux", "to": "p1" },
+      { "from": "item.cle_exp", "to": "p2" },
+      { "from": "info.note_verne", "to": "p3" },
+      { "from": "info.date_incident", "to": "p3" },
+      { "from": "item.lampe_uv", "to": "p4" },
+      { "from": "access.z2", "to": "p4" },
+      { "from": "item.fusible", "to": "p5" },
+      { "from": "info.ordre_fusibles", "to": "p5" },
+      { "from": "state.courant", "to": "p6" },
+      { "from": "info.protocole_ordre", "to": "p6" },
+      { "from": "info.mapping_symboles", "to": "p6" }
+    ]
+  },
+
+  "metrics": {
+    "criticalPathDepth": 5,
+    "parallelBranches": 2,
+    "multiZoneJoinPuzzles": 1,
+    "maxInferenceSteps": 2,
+    "zoneCount": 3,
+    "estimatedMinutes": 35,
+    "decoyCount": 0
+  },
+
+  "validation": {
+    "solvable": true,
+    "solverTrace": [
+      { "pass": 1, "harvested": ["info.memo_casier", "info.badge_roux"], "solved": ["p1"], "gained": ["access.casier3", "item.cle_exp", "item.lampe_uv"] },
+      { "pass": 2, "harvested": [], "solved": ["p2"], "gained": ["access.z2"] },
+      { "pass": 3, "harvested": ["info.date_incident", "info.note_verne", "info.protocole_ordre", "item.fusible"], "solved": ["p3", "p4"], "gained": ["access.z3", "info.ordre_fusibles"] },
+      { "pass": 4, "harvested": ["info.mapping_symboles"], "solved": ["p5"], "gained": ["state.courant"] },
+      { "pass": 5, "harvested": [], "solved": ["p6"], "gained": ["goal.sortie"] }
+    ],
+    "lints": {
+      "dag-check": "pass",
+      "source-check": "pass",
+      "anchor-check": "pass",
+      "ambiguity-check": "pass",
+      "tool-order-check": "pass",
+      "progress-check": "pass",
+      "no-loss-check": "pass",
+      "decoy-check": "pass",
+      "dead-object-check": "pass"
+    }
+  }
+}

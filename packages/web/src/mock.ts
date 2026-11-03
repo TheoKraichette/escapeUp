@@ -1,0 +1,148 @@
+// Vue client de démonstration (hors-ligne) — permet de tester le rendu 3D et le
+// HUD sans serveur. Déjà EXPURGÉE : c'est une ClientRoomView valide, jamais une
+// RoomSpec (aucune solution/graphe/backstory). Inspirée de la salle « labo ».
+
+import type { ClientRoomView } from '@escapeup/engine';
+
+export const MOCK_VIEW: ClientRoomView = {
+  seed: 'DEMO-LAB',
+  theme: 'laboratoire',
+  title: 'Protocole P-7 (démo)',
+  playerObjective:
+    "Le confinement du laboratoire Helios ne peut être levé que de l'intérieur. Trouvez comment neutraliser la cuve, et sortez.",
+  zones: [
+    {
+      id: 'z1',
+      name: "Bureau d'accueil",
+      accessible: true,
+      pois: [
+        { id: 'poi.comptoir', name: "Comptoir d'accueil" },
+        { id: 'poi.tableau_affichage', name: "Tableau d'affichage" },
+        { id: 'poi.casiers', name: 'Casiers du personnel' },
+        { id: 'poi.tableau_electrique', name: 'Tableau électrique' },
+        { id: 'poi.porte_exp', name: 'Porte « EXP »' },
+        { id: 'poi.porte_reserve', name: 'Porte « RÉSERVE »' },
+        { id: 'poi.sas_sortie', name: 'Sas de sortie' },
+      ],
+    },
+    { id: 'z2', name: "Salle d'expérimentation", accessible: false, pois: [] },
+    { id: 'z3', name: 'Réserve chimique', accessible: false, pois: [] },
+  ],
+  objects: [
+    {
+      id: 'obj.tableau_affichage',
+      name: "Tableau d'affichage",
+      description: 'Un tableau en liège couvert de notes de service jaunies.',
+      family: 'info_carrier',
+      location: { zoneId: 'z1', poiId: 'poi.tableau_affichage' },
+      state: 'visible',
+      affordances: ['inspect', 'read'],
+    },
+    {
+      id: 'obj.comptoir',
+      name: "Comptoir d'accueil",
+      description: 'Un comptoir poussiéreux ; le registre des visites est resté ouvert.',
+      family: 'info_carrier',
+      location: { zoneId: 'z1', poiId: 'poi.comptoir' },
+      state: 'visible',
+      affordances: ['inspect'],
+    },
+    {
+      id: 'obj.casier3',
+      name: 'Casier n° 3',
+      description: 'Un casier métallique fermé par un cadenas à 3 chiffres.',
+      family: 'mechanism',
+      location: { zoneId: 'z1', poiId: 'poi.casiers' },
+      state: 'locked',
+      affordances: ['inspect', 'enter_code'],
+      controls: { kind: 'code', length: 3, alphabet: 'digits', label: 'code personnel' },
+    },
+    {
+      id: 'obj.porte_exp',
+      name: 'Porte « EXP »',
+      description: "Une porte à serrure mécanique. Plaque : SALLE D'EXPÉRIMENTATION — EXP.",
+      family: 'mechanism',
+      location: { zoneId: 'z1', poiId: 'poi.porte_exp' },
+      state: 'locked',
+      affordances: ['inspect', 'use_on'],
+      controls: { kind: 'keyhole', label: 'EXP' },
+    },
+    {
+      id: 'obj.porte_reserve',
+      name: 'Porte « RÉSERVE »',
+      description: 'Une porte lourde fermée par un cadenas à 4 molettes gravé « ANNÉE ».',
+      family: 'mechanism',
+      location: { zoneId: 'z1', poiId: 'poi.porte_reserve' },
+      state: 'locked',
+      affordances: ['inspect', 'enter_code'],
+      controls: { kind: 'code', length: 4, alphabet: 'digits', label: 'ANNÉE' },
+    },
+    {
+      id: 'obj.tableau_electrique',
+      name: 'Tableau électrique',
+      description: 'Quatre porte-fusibles F1 à F4. Le fusible F3 est grillé.',
+      family: 'mechanism',
+      location: { zoneId: 'z1', poiId: 'poi.tableau_electrique' },
+      state: 'visible',
+      affordances: ['inspect', 'use_on', 'activate'],
+      controls: { kind: 'switch' },
+    },
+    {
+      id: 'obj.panneau_purge',
+      name: 'Panneau de purge',
+      description: 'Un panneau à trois boutons gravés ▲ ● ■. L’écran est éteint.',
+      family: 'mechanism',
+      location: { zoneId: 'z1', poiId: 'poi.sas_sortie' },
+      state: 'visible',
+      affordances: ['inspect', 'enter_sequence'],
+      controls: {
+        kind: 'sequence',
+        slots: 3,
+        options: [
+          { id: 'press_triangle', label: '▲' },
+          { id: 'press_circle', label: '●' },
+          { id: 'press_square', label: '■' },
+        ],
+      },
+    },
+    {
+      id: 'obj.plante_verte',
+      name: 'Plante verte desséchée',
+      description: 'Un ficus mort depuis des années.',
+      family: 'decor',
+      location: { zoneId: 'z1', poiId: 'poi.comptoir' },
+      state: 'visible',
+      affordances: ['inspect'],
+    },
+    {
+      id: 'obj.affiche_securite',
+      name: 'Affiche de sécurité',
+      description: 'Une affiche de prévention défraîchie. Ironique, vu les circonstances.',
+      family: 'decor',
+      location: { zoneId: 'z1', poiId: 'poi.tableau_affichage' },
+      state: 'visible',
+      affordances: ['inspect'],
+    },
+    // Un objet déjà en inventaire pour tester le HUD et le use_on.
+    {
+      id: 'obj.lampe_uv',
+      name: 'Lampe UV',
+      description: 'Une lampe torche à ultraviolets de maintenance.',
+      family: 'instrument',
+      location: 'inventory',
+      state: 'taken',
+      affordances: ['use_on'],
+    },
+  ],
+  inventory: ['obj.lampe_uv'],
+  notebook: [
+    {
+      nodeId: 'info.badge_roux',
+      objectId: 'obj.badge_roux',
+      text: 'HELIOS LABS — ROUX Marc — Employé n° 418 — Casier 3',
+    },
+  ],
+  solvedPuzzles: [],
+  puzzleCount: 3,
+  goalReached: false,
+};

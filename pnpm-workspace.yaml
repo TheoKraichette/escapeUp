@@ -1,0 +1,13 @@
+packages:
+  - packages/*
+
+# Layout node_modules à plat (style npm) : contourne les échecs EPERM
+# du rename de dossiers de pnpm sous le filtre temps réel de Defender.
+nodeLinker: hoisted
+
+# pnpm 11 bloque par défaut les scripts de build des dépendances (strictDepBuilds)
+# et sort en erreur (ERR_PNPM_IGNORED_BUILDS). esbuild (utilisé par vite/tsx) doit
+# builder son binaire natif → on l'autorise explicitement, sinon `docker build` échoue.
+# NB : pnpm 11 utilise `allowBuilds` (map), pas l'ancien `onlyBuiltDependencies`.
+allowBuilds:
+  esbuild: true

@@ -1,0 +1,19 @@
+# Ne JAMAIS copier les node_modules de l'hôte dans l'image : chaque image fait son
+# propre `pnpm install`. Les node_modules de l'hôte (Windows + nodeLinker hoisted)
+# contiennent des symlinks/junctions qui, copiés sur Linux, écrasent l'install du
+# conteneur et cassent la résolution de modules (@escapeup/engine, zustand/react…).
+# Bonus : le contexte de build passe de ~150 Mo à quelques Mo.
+**/node_modules
+
+# Caches et artefacts de build (régénérés dans l'image)
+**/dist
+**/.vite
+**/*.tsbuildinfo
+
+# Rien de tout ceci n'est utile au build de l'image
+.git
+.gitignore
+*.log
+.env
+.env.*
+!.env.example
